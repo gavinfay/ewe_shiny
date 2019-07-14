@@ -232,8 +232,11 @@ gom.run <- rsim.run(gom.scence)
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
+   # Select model to view
+   selectInput("model", "Model", c("Anchovy Bay", "Gulf of Maine")),
+   
    # Application title
-   titlePanel("Anchovy Bay: EcoSim"),
+   titlePanel("Food Web Model Scenario Viewer"),
    
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
@@ -310,11 +313,17 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+   modelInput <- reactive({
+    switch(input$model,
+           "Anchovy Bay" = AB,
+           "Gulf of Maine" = GOM)
+   })
    
    output$webplot <- renderPlot({
      
      #par(mfrow=c(2,2))
-     webplot(AB, labels = T)
+     webplot(modelInput(), labels = T)
    })
    
    output$bioplot <- renderPlot({
