@@ -4,7 +4,7 @@
 
 library(Rpath); library(data.table)
 
-groups <- c("Phytoplankton- Primary Producers", "Bacteria", "Microzooplankton",
+gom.groups <- c("Phytoplankton- Primary Producers", "Bacteria", "Microzooplankton",
             "Small copepods", "Large Copepods", "Gelatinous Zooplankton", "Micronekton",
             "Macrobenthos- polychaetes", "Macrobenthos- crustaceans", "Macrobenthos- molluscs",
             "Macrobenthos- other", "Megabenthos- filterers", "Megabenthos- other",
@@ -14,9 +14,9 @@ groups <- c("Phytoplankton- Primary Producers", "Bacteria", "Microzooplankton",
             "Demersals- omnivores", "Demersals- piscivores", "Sharks- pelagics",
             "HMS", "Pinnipeds", "Baleen Whales", "Odontocetes", "Sea Birds",
             "Discard", "Detritus-POC", "Fishery")
-type <- c(1, rep(0, 28), rep(2, 2), 3)
+gom.type <- c(1, rep(0, 28), rep(2, 2), 3)
 
-gom.par <- create.rpath.params(groups, type)
+gom.par <- create.rpath.params(gom.groups, gom.type)
 
 gom.par$model[, Biomass := c(22.126, 5.484, 4.885, 10.403, 11.955, 1.283, 4.874,
                              18.942, 4.04, 9.866, 24.936, 2.879, 3.505, 0.396, 0.207,
@@ -49,15 +49,15 @@ gom.par$model[, 'Detritus-POC' := c(rep(1, 29), rep(0, 3))]
 
 gom.par$model[, Fishery := c(rep(0, 11), 0.0917, 0.345, 0.0622, 0, 0.874, 0.0000151,
                              0.0138, 0.00561, 0.0101, 0.142, 0.00718, 0.301, 0.00024,
-                             0.00182, rep(0, 7))]
+                             0.00182, rep(0, 6), NA)]
 
 gom.par$model[, Fishery.disc := c(rep(0, 5), 6.36E-07, 0, 0.000135, 0.0000183, 0.000189,
                                   0.000724, 0.0302, 0.104, 0.0195, 2.65E-09, 0.131,
                                   0.000156, 0.000562, 0.0167, 0.00303, 0.043, 0.00228,
                                   0.0904, 0.0000721, 0.000545, 0.00115, 0.000405,
-                                  0.000139, 0.0000588, rep(0, 3))]
+                                  0.000139, 0.0000588, rep(0, 2), NA)]
 
-DC.groups <- groups[which(!groups %in% c('Discard', 'Detritus-POC', 'Fishery'))]
+DC.groups <- gom.groups[which(!gom.groups %in% c('Discard', 'Detritus-POC', 'Fishery'))]
 
 DC.c.code <-as.data.table(matrix(c(
   0,0,0.4305193,0.2117425,0.7240587,0.6317893,0.08602893,0.1824,0.1241,0.1351713,0.4000163,0.2008283,0.7909901,0,0.07548419,0.0589119,0.01121766,0.1656693,0,0.0117771,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -110,7 +110,7 @@ GOM <- rpath(gom.par, 'Gulf of Maine')
 #Check sim
 gom.scence <- rsim.scenario(GOM, gom.par, 1:100)
 gom.run <- rsim.run(gom.scence)
-rsim.plot(gom.run, groups)
+rsim.plot(gom.run, gom.groups)
 
 # #Create community matrices for Qpress
 # GOM.10 <- Rpath2Qpress(GOM.params, .1, .1)
