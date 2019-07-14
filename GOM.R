@@ -110,9 +110,17 @@ GOM <- rpath(gom.par, 'Gulf of Maine')
 webplot(GOM, highlight = "Sea Birds")
 
 #Check sim
-gom.scence <- rsim.scenario(GOM, gom.par, 1:100)
+gom.base <- rsim.scenario(GOM, gom.par, 1:100)
 gom.run <- rsim.run(gom.scence)
 rsim.plot(gom.run, gom.groups)
+
+#scenario plots
+GOM.b2 <- adjust.fishing(gom.base, parameter = 'EFFORT', group = 'Fishery',
+                         value =2, sim.year = 25:100)
+
+GOM.run1 <- rsim.run(GOM.b2)
+rsim.plot(GOM.run1, gom.groups[1:30])
+
 
 # #Create community matrices for Qpress
 # GOM.10 <- Rpath2Qpress(GOM.params, .1, .1)
