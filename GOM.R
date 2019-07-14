@@ -107,6 +107,8 @@ check.rpath.params(gom.par)
 #Run model
 GOM <- rpath(gom.par, 'Gulf of Maine')
 
+webplot(GOM, highlight = "Sea Birds")
+
 #Check sim
 gom.scence <- rsim.scenario(GOM, gom.par, 1:100)
 gom.run <- rsim.run(gom.scence)
