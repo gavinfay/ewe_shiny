@@ -224,7 +224,7 @@ check.rpath.params(gom.par)
 #Run model
 GOM <- rpath(gom.par, 'Gulf of Maine')
 #Check sim
-gom.scence <- rsim.scenario(GOM, gom.par, 1:100)
+gom.base <- rsim.scenario(GOM, gom.par, 1:100)
 gom.run <- rsim.run(gom.scence)
 #rsim.plot(gom.run, gom.groups)
 
@@ -232,65 +232,76 @@ gom.run <- rsim.run(gom.scence)
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
-   # Select model to view
-   selectInput("model", "Model", c("Anchovy Bay", "Gulf of Maine")),
-   
    # Application title
    titlePanel("Food Web Model Scenario Viewer"),
+   
+   # Select model to view
+   selectInput("model", "Model", c("Anchovy Bay", "Gulf of Maine")),
    
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
      sidebarPanel(
-       helpText("App by G. Fay, Rpath by Sean Lucey"),
+       helpText("App by G. Fay and S. Gaichas, Rpath by Sean Lucey"),
        
-         #numericInput('Nsims', 'Number of simulations', Nsims, value = 2),
-         #numericInput('Nyr', 'Number of years', Nyr),
-        sliderInput("hrateSeal",
-                    "Relative sealer effort:",
-                    min = 0,
-                    max = 5,
-                    value = 1,
-                    step = 0.2),
-        sliderInput("hrateT",
-                     "Relative trawler effort:",
-                     min = 0,
-                     max = 5,
-                     value = 1,
-                     step = 0.2),
-        sliderInput("hrateS",
-                    "Relative seiner effort:",
-                    min = 0,
-                    max = 5,
-                    value = 1,
-                    step = 0.2),
-        sliderInput("hrateSh",
-                    "Relative shrimper effort:",
-                    min = 0,
-                    max = 5,
-                    value = 1,
-                    step = 0.2),
-        sliderInput("codVV",
-                    "Cod Top-down predation:",
-                    min = 0,
-                    max = 500,
-                    value = 2),
-        sliderInput("whitingAdj",
-                    "Whiting foraging behavior:",
-                    min = 0,
-                    max = 3,
-                    value = 0) #,
-         # sliderInput("hrateP",
-         #             "Pelagics harvest rate:",
-         #             min = 0,
-         #             max = 1,
-         #             value = 0.2),
-         # sliderInput("hrateE",
-         #             "Elasmobranchs harvest rate:",
-         #             min = 0,
-         #             max = 1,
-         #             value = 0.05)         
-      ),
-      
+       #numericInput('Nsims', 'Number of simulations', Nsims, value = 2),
+       #numericInput('Nyr', 'Number of years', Nyr),
+       conditionalPanel(condition = "input.model == 'Anchovy Bay'",
+                        sliderInput("hrateSeal",
+                                    "Relative sealer effort:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2),
+                        sliderInput("hrateT",
+                                    "Relative trawler effort:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2),
+                        sliderInput("hrateS",
+                                    "Relative seiner effort:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2),
+                        sliderInput("hrateSh",
+                                    "Relative shrimper effort:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2),
+                        sliderInput("codVV",
+                                    "Cod Top-down predation:",
+                                    min = 0,
+                                    max = 500,
+                                    value = 2),
+                        sliderInput("whitingAdj",
+                                    "Whiting foraging behavior:",
+                                    min = 0,
+                                    max = 3,
+                                    value = 0) #,
+                        # sliderInput("hrateP",
+                        #             "Pelagics harvest rate:",
+                        #             min = 0,
+                        #             max = 1,
+                        #             value = 0.2),
+                        # sliderInput("hrateE",
+                        #             "Elasmobranchs harvest rate:",
+                        #             min = 0,
+                        #             max = 1,
+                        #             value = 0.05)         
+       ),
+       
+       conditionalPanel(condition = "input.model == 'Gulf of Maine'",
+                        sliderInput("hrateFishery",
+                                    "Relative combined fishing effort:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2)
+       )
+     ), #end sidebar panel
+     
       # Show a plot of the generated distribution
       mainPanel(
         
@@ -307,9 +318,9 @@ ui <- fluidPage(
                     tabPanel("Summary Table", tableOutput("table"))
         )
         #plotOutput("EwEplot")
-      )
-   )
-)
+      ) #end main panel
+   ) #end sidebar layout
+) #end ui
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -328,27 +339,35 @@ server <- function(input, output) {
    
    output$bioplot <- renderPlot({
      #Increase trawling
-     AB.b2 <- adjust.fishing(AB.base, parameter = 'EFFORT', group = 'trawlers',
+     if(input$model == "Anchovy Bay"){
+       AB.b2 <- adjust.fishing(AB.base, parameter = 'EFFORT', group = 'trawlers',
                                value = input$hrateT, sim.year = 8:25)
-     AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'sealers',
+       AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'sealers',
                                value = input$hrateSeal, sim.year = 4:25)
-     AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'seiners',
-                             value = input$hrateS, sim.year = 8:25)
-     AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'shrimpers',
-                             value = input$hrateSh, sim.year = 8:25)     
-     
-     #Have Cod exert top-down effects
-     AB.b2 <- adjust.scenario(AB.b2, parameter = 'VV', group = 'whiting', 
+       AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'seiners',
+                               value = input$hrateS, sim.year = 8:25)
+       AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'shrimpers',
+                               value = input$hrateSh, sim.year = 8:25)     
+       
+       #Have Cod exert top-down effects
+       AB.b2 <- adjust.scenario(AB.b2, parameter = 'VV', group = 'whiting', 
                                 groupto = 'cod', value = input$codVV)
-     
-     #Change whiting's foraging behavior
-     AB.b2 <- adjust.scenario(AB.b2, parameter = 'FtimeAdj', group = 'whiting',
+       
+       #Change whiting's foraging behavior
+       AB.b2 <- adjust.scenario(AB.b2, parameter = 'FtimeAdj', group = 'whiting',
                                 value = input$whitingAdj)
-     
-     AB.run7 <- rsim.run(AB.b2, method = 'AB', 1:25)
-     rsim.plot(AB.run7, AB.groups[1:11])
-     #rsim.plot(AB.run7, AB.groups[12:16])
-     
+       
+       AB.run7 <- rsim.run(AB.b2, method = 'AB', 1:25)
+       rsim.plot(AB.run7, AB.groups[1:11])
+       #rsim.plot(AB.run7, AB.groups[12:16])
+     }
+     if(input$model == "Gulf of Maine"){
+       GOM.b2 <- adjust.fishing(gom.base, parameter = 'EFFORT', group = 'Fishery',
+                                value = input$hrateFishery, sim.year = 25:100)
+       
+       GOM.run1 <- rsim.run(GOM.b2)
+       rsim.plot(GOM.run1, gom.groups[1:29])
+     }
      
 # #      res <- do_msprod(hrateG = input$hrateG, Nsims = input$Nsims, Nyr = input$Nyr)
 #       res <- do_msprod(hrateG = input$hrateG,
