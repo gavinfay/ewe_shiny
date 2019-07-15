@@ -9,7 +9,8 @@
 
 library(shiny)
 #devtools::install_github('slucey/RpathDev/Rpath', ref = 'Public')
-library(data.table); library(Rpath); library(ggplot2); library(forcats); library(tidyverse)
+library(data.table); library(Rpath); library(ggplot2); library(forcats); library(tidyverse);
+library(shinyWidgets)
 
 #-------------------------------------------------------------------------------
 #User created functions
@@ -316,11 +317,16 @@ ui <- fluidPage(
                                     min = 0,
                                     max = 5,
                                     value = 1,
-                                    step = 0.2),
-                        checkboxGroupInput("plotGroups", label = h3("Select groups to plot"), 
-                                           choiceNames = c("All",unique(GOM$Group)),
-                                           choiceValues = c(0:length(GOM$Group)),
-                                           selected = 0) 
+                                    step = 0.2)#,
+                        # checkboxGroupInput("plotGroups", label = h3("Select groups to plot"), 
+                        #                    choiceNames = c("All",unique(GOM$Group)),
+                        #                    choiceValues = c(0:length(GOM$Group)),
+                        #                    selected = 0) 
+                        # pickerInput("plotGroups", label = h3("Select groups to plot"), 
+                        #             choices = c(unique(GOM$Group)), selected = NULL,
+                        #             multiple = TRUE, options = list(`actions-box` = TRUE), choicesOpt = NULL,
+                        #             width = NULL, inline = FALSE)
+                        
                         
        )
      ), #end sidebar panel
@@ -403,9 +409,7 @@ server <- function(input, output) {
        
        GOM.run1 <- rsim.run(GOM.b2)
        
-       if(input$plotGroups==0) pg <- c(1:29)
-       else pg <- input$plotGroups
-       rsim.plot(GOM.run1, gom.groups[pg])
+       rsim.plot(GOM.run1, gom.groups)
      }
      
 # #      res <- do_msprod(hrateG = input$hrateG, Nsims = input$Nsims, Nyr = input$Nyr)
@@ -500,6 +504,7 @@ server <- function(input, output) {
 
    
    output$catplot3 <- renderPlot({
+     if(input$model == "Anchovy Bay"){
      AB.b2 <- adjust.fishing(AB.base, parameter = 'EFFORT', group = 'trawlers',
                              value = input$hrateT, sim.year = 8:25)
      AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'sealers',
@@ -563,29 +568,111 @@ server <- function(input, output) {
      # lines(tyield$Shrimper~tyield$Effort,col='magenta',lwd=2)
      # legend('right',legend=c('Trawlers','Seiners','Shrimpers'),lty=1,col=c('black','blue','magenta'),
      #        title='Fleet')
+     }
+     if(input$model == "Gulf of Maine"){
+       #Change fishing effort
+       GOM.b2 <- adjust.fishing(gom.base, parameter = 'EFFORT', group = 'Fishery',
+                                value = input$hrateFishery, sim.year = 25:100)
+       
+       #Change herring mort (commercial small pelagics in GOM mostly herring)
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- commercial',
+                                value = input$herringZ, sim.year = 25:100)
+       
+       #Change seabird mort
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Sea Birds',
+                                value = input$seabirdZ, sim.year = 25:100)
+       
+       #Change herring as prey
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'byprey', group = 'Small Pelagics- commercial',
+                                value = input$herringprey, sim.year = 25:100)
+       
+       GOM.run1 <- rsim.run(GOM.b2)
+       
+       catch <- GOM.run1$out_CC[, 2:ncol(GOM.run1$out_CC)]
+       catch <- catch[,colSums(catch) > 0]
+       n <- ncol(catch)
+       spname <- colnames(catch)
+       #Plot catch
+       opar <- par(mar = c(4, 6, 2, 0))
+       
+       ymax <- max(catch) + 0.1 * max(catch)
+       ymin <- min(catch) - 0.1 * min(catch)
+       xmax <- nrow(catch)
+       
+       #Create space for legend
+       plot.new()
+       l <- legend(0, 0, bty='n', spname, 
+                   plot=FALSE, fill = line.col, cex = 0.6)
+       # calculate right margin width in ndc
+       w <- grconvertX(l$rect$w, to='ndc') - grconvertX(0, to='ndc')
+       
+       par(omd=c(0, 1-w, 0, 1))
+       plot(0, 0, ylim = c(ymin, ymax), xlim = c(0, xmax), 
+            axes = F, xlab = '', ylab = '', type = 'n')
+       axis(1)
+       axis(2, las = T)
+       box(lwd = 2)
+       mtext(1, text = 'Months', line = 2.5, cex = 1.8)
+       mtext(2, text = 'Catch', line = 3, cex = 1.8)
+       
+       line.col <- rainbow(n)
+       for(i in 1:n){
+         lines(catch[, i], col = line.col[i], lwd = 3)
+       }
+       
+       legend(par('usr')[2], par('usr')[4], bty='n', xpd=NA,
+              spname, fill = line.col, cex = 0.6)
+       
+       par(opar)
+       
+     }
    })
    
    output$table <- renderTable({
-     AB.b2 <- adjust.fishing(AB.base, parameter = 'EFFORT', group = 'trawlers',
-                             value = input$hrateT, sim.year = 8:25)
-     AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'sealers',
-                             value = input$hrateSeal, sim.year = 4:25)
-     AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'seiners',
-                             value = input$hrateS, sim.year = 8:25)
-     AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'shrimpers',
-                             value = input$hrateSh, sim.year = 8:25)     
-     
-     #Have Cod exert top-down effects
-     AB.b2 <- adjust.scenario(AB.b2, parameter = 'VV', group = 'whiting', 
-                              groupto = 'cod', value = input$codVV)
-     
-     #Change whiting's foraging behavior
-     AB.b2 <- adjust.scenario(AB.b2, parameter = 'FtimeAdj', group = 'whiting',
-                              value = input$whitingAdj)
-     
-     AB.run7 <- rsim.run(AB.b2, method = 'AB', 1:25)
-     
-     print(AB.run7)
+     if(input$model == "Anchovy Bay"){
+       AB.b2 <- adjust.fishing(AB.base, parameter = 'EFFORT', group = 'trawlers',
+                               value = input$hrateT, sim.year = 8:25)
+       AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'sealers',
+                               value = input$hrateSeal, sim.year = 4:25)
+       AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'seiners',
+                               value = input$hrateS, sim.year = 8:25)
+       AB.b2 <- adjust.fishing(AB.b2, parameter = 'EFFORT', group = 'shrimpers',
+                               value = input$hrateSh, sim.year = 8:25)     
+       
+       #Have Cod exert top-down effects
+       AB.b2 <- adjust.scenario(AB.b2, parameter = 'VV', group = 'whiting', 
+                                groupto = 'cod', value = input$codVV)
+       
+       #Change whiting's foraging behavior
+       AB.b2 <- adjust.scenario(AB.b2, parameter = 'FtimeAdj', group = 'whiting',
+                                value = input$whitingAdj)
+       
+       AB.run7 <- rsim.run(AB.b2, method = 'AB', 1:25)
+       
+       print(AB.run7)
+     }
+     if(input$model == "Gulf of Maine"){
+       #Change fishing effort
+       GOM.b2 <- adjust.fishing(gom.base, parameter = 'EFFORT', group = 'Fishery',
+                                value = input$hrateFishery, sim.year = 25:100)
+       
+       #Change herring mort (commercial small pelagics in GOM mostly herring)
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- commercial',
+                                value = input$herringZ, sim.year = 25:100)
+       
+       #Change seabird mort
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Sea Birds',
+                                value = input$seabirdZ, sim.year = 25:100)
+       
+       #Change herring as prey
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'byprey', group = 'Small Pelagics- commercial',
+                                value = input$herringprey, sim.year = 25:100)
+       
+       GOM.run1 <- rsim.run(GOM.b2)
+       
+       print(GOM.run1)
+       
+     }
    })
 }
 
