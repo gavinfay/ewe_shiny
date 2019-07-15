@@ -299,12 +299,19 @@ ui <- fluidPage(
                                     max = 5,
                                     value = 1,
                                     step = 0.2),
-                        sliderInput("herringB",
-                                    "Relative biomass, Commercial small pelagics:",
+                        sliderInput("herringZ",
+                                    "Mortality, Commercial small pelagics:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2),
+                        sliderInput("seabirdZ",
+                                    "Mortality, Seabirds:",
                                     min = 0,
                                     max = 5,
                                     value = 1,
                                     step = 0.2)
+                        
        )
      ), #end sidebar panel
      
@@ -372,11 +379,14 @@ server <- function(input, output) {
        GOM.b2 <- adjust.fishing(gom.base, parameter = 'EFFORT', group = 'Fishery',
                                 value = input$hrateFishery, sim.year = 25:100)
        
-       #Change herring biomass (commercial small pelagics in GOM mostly herring)
-       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bybio', group = 'Small Pelagics- commercial',
-                                value = (input$herringB * 
-                                  gom.base$params$B_BaseRef[which(gom.base$params$spname=='Small Pelagics- commercial')])
-                                , sim.year = 25:100)
+       #Change herring mort (commercial small pelagics in GOM mostly herring)
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- commercial',
+                                value = input$herringZ, sim.year = 25:100)
+       
+       #Change seabird mort
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Sea Birds',
+                                value = input$seabirdZ, sim.year = 25:100)
+       
        
        GOM.run1 <- rsim.run(GOM.b2)
        rsim.plot(GOM.run1, gom.groups[1:29])
