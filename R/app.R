@@ -310,6 +310,12 @@ ui <- fluidPage(
                                     min = 0,
                                     max = 5,
                                     value = 1,
+                                    step = 0.2),
+                        sliderInput("herringprey",
+                                    "Commercial small pelagics as prey:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
                                     step = 0.2)
                         
        )
@@ -387,6 +393,9 @@ server <- function(input, output) {
        GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Sea Birds',
                                 value = input$seabirdZ, sim.year = 25:100)
        
+       #Change herring as prey
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'byprey', group = 'Small Pelagics- commercial',
+                                value = input$herringprey, sim.year = 25:100)
        
        GOM.run1 <- rsim.run(GOM.b2)
        rsim.plot(GOM.run1, gom.groups[1:29])
