@@ -588,7 +588,9 @@ server <- function(input, output) {
        
        GOM.run1 <- rsim.run(GOM.b2)
        
+       #same code as rsim.plot but for catch, and subset by selected groups
        catch <- GOM.run1$out_CC[, 2:ncol(GOM.run1$out_CC)]
+       catch <- catch[,colnames(catch) %in% input$plotGroups]
        catch <- catch[,colSums(catch) > 0]
        n <- ncol(catch)
        spname <- colnames(catch)
