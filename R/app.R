@@ -316,7 +316,11 @@ ui <- fluidPage(
                                     min = 0,
                                     max = 5,
                                     value = 1,
-                                    step = 0.2)
+                                    step = 0.2),
+                        checkboxGroupInput("plotGroups", label = h3("Select groups to plot"), 
+                                           choiceNames = c("All",unique(GOM$Group)),
+                                           choiceValues = c(0:length(GOM$Group)),
+                                           selected = 0) 
                         
        )
      ), #end sidebar panel
@@ -398,7 +402,10 @@ server <- function(input, output) {
                                 value = input$herringprey, sim.year = 25:100)
        
        GOM.run1 <- rsim.run(GOM.b2)
-       rsim.plot(GOM.run1, gom.groups[1:29])
+       
+       if(input$plotGroups==0) pg <- c(1:29)
+       else pg <- input$plotGroups
+       rsim.plot(GOM.run1, gom.groups[pg])
      }
      
 # #      res <- do_msprod(hrateG = input$hrateG, Nsims = input$Nsims, Nyr = input$Nyr)
