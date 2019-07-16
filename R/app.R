@@ -409,7 +409,51 @@ server <- function(input, output) {
        
        GOM.run1 <- rsim.run(GOM.b2)
        
-       rsim.plot(GOM.run1, gom.groups)
+       #rsim.plot(GOM.run1, gom.groups)
+       #same code as rsim.plot but for catch, and subset by selected groups
+       bio <- GOM.run1$out_BB[, 2:ncol(GOM.run1$out_BB)]
+       bio <- bio[,colnames(bio) %in% input$plotGroups]
+       
+       n <- ncol(bio)
+       spname <- colnames(bio)
+       
+       start.bio <- bio[1, ]
+       start.bio[which(start.bio == 0)] <- 1
+       rel.bio <- matrix(NA, dim(bio)[1], dim(bio)[2])
+       for(isp in 1:n) rel.bio[, isp] <- bio[, isp] / start.bio[isp]
+       
+       #Plot relbio
+       opar <- par(mar = c(4, 6, 2, 0))
+       
+       ymax <- max(rel.bio) + 0.1 * max(rel.bio)
+       ymin <- min(rel.bio) - 0.1 * min(rel.bio)
+       xmax <- nrow(rel.bio)
+       
+       #Create space for legend
+       plot.new()
+       l <- legend(0, 0, bty='n', spname, 
+                   plot=FALSE, fill = line.col, cex = 0.6)
+       # calculate right margin width in ndc
+       w <- grconvertX(l$rect$w, to='ndc') - grconvertX(0, to='ndc')
+       
+       par(omd=c(0, 1-w, 0, 1))
+       plot(0, 0, ylim = c(ymin, ymax), xlim = c(0, xmax), 
+            axes = F, xlab = '', ylab = '', type = 'n')
+       axis(1)
+       axis(2, las = T)
+       box(lwd = 2)
+       mtext(1, text = 'Months', line = 2.5, cex = 1.8)
+       mtext(2, text = 'Relative Biomass', line = 3, cex = 1.8)
+       
+       line.col <- rainbow(n)
+       for(i in 1:n){
+         lines(rel.bio[, i], col = line.col[i], lwd = 3)
+       }
+       
+       legend(par('usr')[2], par('usr')[4], bty='n', xpd=NA,
+              spname, fill = line.col, cex = 0.6)
+       
+       par(opar)
      }
      
 # #      res <- do_msprod(hrateG = input$hrateG, Nsims = input$Nsims, Nyr = input$Nyr)
