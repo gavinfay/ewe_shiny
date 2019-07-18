@@ -59,15 +59,15 @@ AB.params$model[Group == 'anchovy',  "bait boats" := 0.2]
 AB.params$model[Group == 'shrimp',   shrimpers    := 0.05]
 
 #Diet
-AB.params$diet[, whales      := c(rep(NA, 2), 0.1, 0.1, 0.2, 0.5, NA, 0.1, rep(NA, 3))]
-AB.params$diet[, seals       := c(NA, NA, 0.04, 0.05, NA, NA, 0.01, 0.9, rep(NA, 3))]
-AB.params$diet[, cod         := c(NA, NA, NA, 0.05, NA, 0.1, 0.01, 0.84, rep(NA, 3))]
-AB.params$diet[, whiting     := c(NA, NA, 0.05, 0.05, NA, 0.45, 0.01, 0.44, rep(NA, 3))]
-AB.params$diet[, mackerel    := c(rep(NA, 4), 0.05, 0.5, NA, NA, 0.45, NA, NA)]
-AB.params$diet[, anchovy     := c(rep(NA, 8), 1, NA, NA)]
-AB.params$diet[, shrimp      := c(rep(NA, 7), 1, rep(NA, 3))]
-AB.params$diet[, benthos     := c(rep(NA, 7), 0.1, 0.1, 0.1, 0.7)]
-AB.params$diet[, zooplankton := c(rep(NA, 9), 0.9, 0.1)]
+AB.params$diet[, whales      := c(rep(NA, 2), 0.1, 0.1, 0.2, 0.5, NA, 0.1, rep(NA, 3), NA)]
+AB.params$diet[, seals       := c(NA, NA, 0.04, 0.05, NA, NA, 0.01, 0.9, rep(NA, 3), NA)]
+AB.params$diet[, cod         := c(NA, NA, NA, 0.05, NA, 0.1, 0.01, 0.84, rep(NA, 3), NA)]
+AB.params$diet[, whiting     := c(NA, NA, 0.05, 0.05, NA, 0.45, 0.01, 0.44, rep(NA, 3), NA)]
+AB.params$diet[, mackerel    := c(rep(NA, 4), 0.05, 0.5, NA, NA, 0.45, NA, NA, NA)]
+AB.params$diet[, anchovy     := c(rep(NA, 8), 1, NA, NA, NA)]
+AB.params$diet[, shrimp      := c(rep(NA, 7), 1, rep(NA, 3), NA)]
+AB.params$diet[, benthos     := c(rep(NA, 7), 0.1, 0.1, 0.1, 0.7, NA)]
+AB.params$diet[, zooplankton := c(rep(NA, 9), 0.9, 0.1, NA)]
 
 check.rpath.params(AB.params)
 
@@ -226,7 +226,7 @@ check.rpath.params(gom.par)
 GOM <- rpath(gom.par, 'Gulf of Maine')
 #Check sim
 gom.base <- rsim.scenario(GOM, gom.par, 1:100)
-gom.run <- rsim.run(gom.scence)
+gom.run <- rsim.run(gom.base)
 #rsim.plot(gom.run, gom.groups)
 
 
@@ -237,7 +237,7 @@ ui <- fluidPage(
    titlePanel("Food Web Model Scenario Viewer"),
    
    # Select model to view
-   selectInput("model", "Model", c("Anchovy Bay", "Gulf of Maine")),
+   selectInput("model", "Model", c("Gulf of Maine")), #"Anchovy Bay", 
    
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
