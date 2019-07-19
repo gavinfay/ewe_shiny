@@ -294,6 +294,11 @@ ui <- fluidPage(
        ),
        
        conditionalPanel(condition = "input.model == 'Gulf of Maine'",
+                        helpText("Please select at least two groups for plotting"),
+                        pickerInput("plotGroups", label = h3("Select groups to plot"), 
+                                    choices = c(unique(GOM$Group)), selected = NULL,
+                                    multiple = TRUE, options = list(`actions-box` = TRUE), choicesOpt = NULL,
+                                    width = NULL, inline = FALSE),
                         sliderInput("hrateFishery",
                                     "Relative combined fishing effort:",
                                     min = 0,
@@ -317,15 +322,11 @@ ui <- fluidPage(
                                     min = 0,
                                     max = 5,
                                     value = 1,
-                                    step = 0.2),
+                                    step = 0.2)
                         # checkboxGroupInput("plotGroups", label = h3("Select groups to plot"), 
                         #                    choiceNames = c("All",unique(GOM$Group)),
                         #                    choiceValues = c(0:length(GOM$Group)),
                         #                    selected = 0) 
-                        pickerInput("plotGroups", label = h3("Select groups to plot"), 
-                                   choices = c(unique(GOM$Group)), selected = NULL,
-                                    multiple = TRUE, options = list(`actions-box` = TRUE), choicesOpt = NULL,
-                                    width = NULL, inline = FALSE)
                         
                         
        )
@@ -408,6 +409,10 @@ server <- function(input, output) {
                                 value = input$herringprey, sim.year = 25:100)
        
        GOM.run1 <- rsim.run(GOM.b2)
+       
+       validate(
+         need(input$plotGroups != "", "Please select at least two groups for plotting")
+       )
        
        #rsim.plot(GOM.run1, gom.groups)
        #same code as rsim.plot but for catch, and subset by selected groups
@@ -631,6 +636,10 @@ server <- function(input, output) {
                                 value = input$herringprey, sim.year = 25:100)
        
        GOM.run1 <- rsim.run(GOM.b2)
+       
+       validate(
+         need(input$plotGroups != "", "Please select at least two groups for plotting")
+       )
        
        #same code as rsim.plot but for catch, and subset by selected groups
        catch <- GOM.run1$out_CC[, 2:ncol(GOM.run1$out_CC)]
