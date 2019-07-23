@@ -311,6 +311,24 @@ ui <- fluidPage(
                                     max = 5,
                                     value = 1,
                                     step = 0.2),
+                        sliderInput("squidZ",
+                                    "Mortality, Small pelagics squid:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2),
+                        sliderInput("anadZ",
+                                    "Mortality, Small pelagics anadromous:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2),
+                        sliderInput("otherpelZ",
+                                    "Mortality, Small pelagics other:",
+                                    min = 0,
+                                    max = 5,
+                                    value = 1,
+                                    step = 0.2),
                         sliderInput("seabirdZ",
                                     "Mortality, Seabirds:",
                                     min = 0,
@@ -399,6 +417,16 @@ server <- function(input, output) {
        #Change herring mort (commercial small pelagics in GOM mostly herring)
        GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- commercial',
                                 value = input$herringZ, sim.year = 25:100)
+
+       #Change squid mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- squid',
+                                value = input$squidZ, sim.year = 25:100)
+       #Change anadromous mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- anadromous',
+                                value = input$anadZ, sim.year = 25:100)
+       #Change otherpelagics mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- other',
+                                value = input$otherpelZ, sim.year = 25:100)
        
        #Change seabird mort
        GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Sea Birds',
@@ -626,6 +654,16 @@ server <- function(input, output) {
        #Change herring mort (commercial small pelagics in GOM mostly herring)
        GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- commercial',
                                 value = input$herringZ, sim.year = 25:100)
+
+       #Change squid mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- squid',
+                                value = input$squidZ, sim.year = 25:100)
+       #Change anadromous mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- anadromous',
+                                value = input$anadZ, sim.year = 25:100)
+       #Change otherpelagics mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- other',
+                                value = input$otherpelZ, sim.year = 25:100)
        
        #Change seabird mort
        GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Sea Birds',
@@ -714,6 +752,17 @@ server <- function(input, output) {
        #Change herring mort (commercial small pelagics in GOM mostly herring)
        GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- commercial',
                                 value = input$herringZ, sim.year = 25:100)
+
+       #Change squid mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- squid',
+                                value = input$squidZ, sim.year = 25:100)
+       #Change anadromous mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- anadromous',
+                                value = input$anadZ, sim.year = 25:100)
+       #Change otherpelagics mort 
+       GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Small Pelagics- other',
+                                value = input$otherpelZ, sim.year = 25:100)
+       
        
        #Change seabird mort
        GOM.b2 <- adjust.forcing(GOM.b2, parameter = 'bymort', group = 'Sea Birds',
