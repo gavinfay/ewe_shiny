@@ -296,7 +296,7 @@ ui <- fluidPage(
        conditionalPanel(condition = "input.model == 'Gulf of Maine'",
                         helpText("Please select at least two groups for plotting"),
                         pickerInput("plotGroups", label = h3("Select groups to plot"), 
-                                    choices = c(unique(GOM$Group)), selected = NULL,
+                                    choices = c(unique(GOM$Group)), selected = c(unique(GOM$Group)),
                                     multiple = TRUE, options = list(`actions-box` = TRUE), choicesOpt = NULL,
                                     width = NULL, inline = FALSE),
                         sliderInput("hrateFishery",
